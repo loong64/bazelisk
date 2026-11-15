@@ -32,6 +32,17 @@ var supportedPlatforms = map[string]*platform{
 	},
 }
 
+// DefaultBazelFork identifies the release repository used by this platform.
+func DefaultBazelFork() string {
+	if runtime.GOOS == "linux" {
+		switch runtime.GOARCH {
+		case "loong64", "ppc64le", "riscv64", "s390x":
+			return "loong64"
+		}
+	}
+	return "bazelbuild"
+}
+
 // GetPlatform returns a Bazel CI-compatible platform identifier for the current operating system.
 // TODO(fweikert): raise an error for unsupported platforms
 func GetPlatform() (string, error) {
@@ -64,8 +75,16 @@ func DetermineArchitecture(osName, version string) (string, error) {
 		machineName = "x86_64"
 	case "arm64":
 		machineName = "arm64"
+	case "loong64", "ppc64le", "riscv64", "s390x":
+		if osName != "linux" {
+			return "", fmt.Errorf("unsupported machine architecture %q on %s", runtime.GOARCH, osName)
+		}
+		machineName = runtime.GOARCH
+		if runtime.GOARCH == "loong64" {
+			machineName = "loongarch64"
+		}
 	default:
-		return "", fmt.Errorf("unsupported machine architecture %q, must be arm64 or x86_64", runtime.GOARCH)
+		return "", fmt.Errorf("unsupported machine architecture %q", runtime.GOARCH)
 	}
 
 	if osName == "darwin" {

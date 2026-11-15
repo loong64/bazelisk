@@ -84,6 +84,8 @@ As mentioned in the previous section, the `<FORK>/<VERSION>` version format allo
 If you want to create a fork with your own releases, you should follow the naming conventions that we use in `bazelbuild/bazel` for the binary file names as this results in predictable URLs that are similar to the official ones.
 The URL format looks like `https://github.com/<FORK>/bazel/releases/download/<VERSION>/<FILENAME>`.
 
+On Linux loongarch64, ppc64le, riscv64, and s390x, Bazelisk uses [`loong64/bazel` releases](https://github.com/loong64/bazel/releases) by default, unless an explicit fork or custom download URL is specified.
+
 You can also override the URL by setting the environment variable `$BAZELISK_BASE_URL`. Bazelisk will then append `/<VERSION>/<FILENAME>` to the base URL instead of using the official release server. Bazelisk will read file [`~/.netrc`](https://everything.curl.dev/usingcurl/netrc) for credentials for Basic authentication.
 
 If for any reason none of this works, you can also override the URL format altogether by setting the environment variable `$BAZELISK_FORMAT_URL`. This variable takes a format-like string with placeholders and performs the following replacements to compute the download URL:

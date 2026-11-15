@@ -104,7 +104,18 @@ func (r *Repositories) resolveFork(bazeliskHome string, vi *versions.Info, confi
 		return "", nil, errors.New("forks do not support last_rc and last_green")
 	}
 	lister := func(bazeliskHome string) ([]string, error) {
-		return r.Fork.GetVersions(bazeliskHome, vi.Fork)
+		available, err := r.Fork.GetVersions(bazeliskHome, vi.Fork)
+		if err != nil || vi.Fork != "loong64" || vi.TrackRestriction == 0 {
+			return available, err
+		}
+		filtered := make([]string, 0, len(available))
+		prefix := fmt.Sprintf("%d.", vi.TrackRestriction)
+		for _, version := range available {
+			if strings.HasPrefix(version, prefix) {
+				filtered = append(filtered, version)
+			}
+		}
+		return filtered, nil
 	}
 	version, err := resolvePotentiallyRelativeVersion(bazeliskHome, lister, vi)
 	if err != nil {

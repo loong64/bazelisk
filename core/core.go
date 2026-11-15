@@ -475,6 +475,9 @@ func downloadBazel(bazelVersionString string, bazeliskHome string, repos *Reposi
 	if err != nil {
 		return "", fmt.Errorf("could not parse Bazel fork and version: %v", err)
 	}
+	if !strings.Contains(bazelVersionString, "/") && config.Get(BaseURLEnv) == "" && config.Get(FormatURLEnv) == "" {
+		bazelFork = platforms.DefaultBazelFork()
+	}
 
 	resolvedBazelVersion, downloader, err := repos.ResolveVersion(bazeliskHome, bazelFork, bazelVersion, config)
 	if err != nil {
@@ -1389,7 +1392,7 @@ func constructInstallerURL(baseURL, formatURL, version string, config config.Con
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("https://github.com/bazelbuild/bazel/releases/download/%s/%s", version, installerFile), nil
+	return fmt.Sprintf("https://github.com/%s/bazel/releases/download/%s/%s", platforms.DefaultBazelFork(), version, installerFile), nil
 }
 
 func downloadCompletionScriptIfNecessary(installerURL, version, bazeliskHome, baseURL string, config config.Config) (string, error) {
@@ -1401,7 +1404,7 @@ func downloadCompletionScriptIfNecessary(installerURL, version, bazeliskHome, ba
 
 	installerForkOrURL := dirForURL(baseURL)
 	if len(installerForkOrURL) == 0 {
-		installerForkOrURL = "bazelbuild"
+		installerForkOrURL = platforms.DefaultBazelFork()
 	}
 
 	// Check metadata mapping for installer URL -> content hash
